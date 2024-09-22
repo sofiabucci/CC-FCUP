@@ -1,0 +1,11 @@
+1.4
+a) printf("%d%d%d\n", a, b, c);
+b) printf("%d;%d\n", x, y); (não tem as variáveis)
+c) printf("%d,%d\n", a, b); / printf("%d,%d,%d\n", a, b, c);
+d) scanf("%d", &a)
+e) scanf("%d", &a);
+f) scanf("%d", &a);
+
+1.5
+nenhum, dará erro, pois não foi atribuido valor ao x, e o y é dependente do x
+
