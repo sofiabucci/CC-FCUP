@@ -26,5 +26,6 @@ public class Losango {
         Scanner obj = new Scanner(System.in);
         int a = obj.nextInt();
         losang(a);
+        obj.close();
     }
 }

@@ -49,5 +49,6 @@ public class Primos {
         int a = obj.nextInt();
         int b = obj.nextInt();
         System.out.print(primesInRange(a, b) +"\n");
+        obj.close();
     }
 }
