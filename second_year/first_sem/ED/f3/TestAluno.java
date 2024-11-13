@@ -27,7 +27,7 @@ class Aluno {
         Aluno[] alunos = new Aluno[n];
         for (int i=0; i<n; i++){
             alunos[i].nome= stdin.nextLine();
-            alunos[i].numero= stddin.nextInt();
+            alunos[i].numero= stdin.nextInt();
         }
 
         for (int i=0; i<n; i++){
