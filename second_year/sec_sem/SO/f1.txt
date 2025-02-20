@@ -1,0 +1,130 @@
+#!/bin/bash
+
+# Exercício 1: Diretório após os comandos
+cd ~
+pwd  # Deve exibir o diretório home
+echo "---"
+
+cd
+pwd  # Também deve exibir o diretório home
+echo "---"
+
+# Exercício 2: Criando a estrutura de diretórios
+mkdir -p dir1/dir2/dir4/dir6
+mkdir -p dir1/dir2/dir5
+mkdir -p dir1/dir3
+echo "Estrutura criada"
+echo "---"
+
+# Exercício 3: Movendo-se entre diretórios
+tree dir1
+cd dir1/dir2/dir4/dir6/../..
+pwd  # Deve exibir "dir1/dir2"
+echo "---"
+
+# Exercício 4: Criando arquivos
+touch dir1/dir2/dir4/g22.doc
+touch dir1/dir2/f1.txt
+touch dir1/dir2/h22.txt
+touch dir1/g368.pdf
+touch dir1/dir3/f3a.txt
+touch dir1/g56.doc
+touch dir1/g3x.pdf
+echo "Arquivos criados"
+echo "---"
+
+# Exercício 5: Procurando arquivos
+find dir1/dir2 -name "[fg][35][4-7a-z].txt" -print
+echo "---"
+find dir1/dir3 -name "[fg][35][4-7a-z].txt" -print
+echo "---"
+
+# Exercício 6: Removendo dir2
+rm -rf dir1/dir2
+tree dir1
+echo "---"
+
+# Exercício 7: Verificando permissões de arquivos
+ls -l dir1/dir3
+echo "---"
+
+# Exercício 8: Alterando permissões
+touch doit
+chmod 755 doit
+ls -l doit
+echo "---"
+chmod u-wx doit
+ls -l doit
+echo "---"
+chmod go-rx doit
+ls -l doit
+echo "---"
+chmod 644 doit
+ls -l doit
+echo "---"
+
+# Exercício 9: Manipulando arquivo de texto
+echo -e "pine:253:221:1.2\noak:144:123:0.9\nbirch:92:83:1.6\nyew:65:63:4.3\nalder:12:5:9.6" > trees.txt
+cut -d ':' -f 1,4 trees.txt
+echo "---"
+cut -d ':' -f 1,4 trees.txt | sort
+echo "---"
+
+# Exercício 10: Manipulando texto
+echo -e "Three Rings for the Elven-kings under the sky,\nSeven for the dwarf-lords in their halls of stone,\nNine for Mortal Men doomed to die,\nOne for the Dark Lord on his dark throne,\nIn the Land of Mordor where the Shadows lie." > q1.txt
+sed 's/Ring/Sword/g' q1.txt > q2.txt
+grep -v Mordor q2.txt
+echo "---"
+wc -l q2.txt
+echo "---"
+
+# Exercício 11: Comparação de arquivos
+echo -e "I don’t know half of you\nhalf as well as I should like;\nand I like less than half of you\nhalf as well as you deserve" > f1.txt
+sed 's/half/two thirds/g' f1.txt > f2.txt
+diff f1.txt f2.txt
+echo "---"
+sed 's/like/do not like/g' f1.txt > f2.txt
+diff f1.txt f2.txt
+echo "---"
+
+# Exercício 12: Ordenação de arquivos
+echo -e "66\n43\n77\n22\n91" > numbers1.txt
+echo -e "Rivendell\nGondolin\nLothlorien\nAngband\nGondor\nMoria\nShire" > words1.txt
+sort -n < numbers1.txt > numbers2.txt
+sort -d < words1.txt > words2.txt
+echo "---"
+
+# Exercício 13: Contando processos ativos
+ps -A | wc -l
+echo "---"
+
+# Exercício 14: Testando processos emacs
+emacs &
+emacs &
+emacs &
+ps -A | grep emacs
+echo "---"
+kill -9 $(ps -A | grep emacs | awk '{print $1}')
+echo "---"
+
+# Exercício 15: Testando xargs
+echo -e "um\ndois\ntres\nquatro\ncinco" > vtext.txt
+cat vtext.txt | xargs
+echo "---"
+cat vtext.txt | xargs >> htext.txt
+more htext.txt
+echo "---"
+ls | xargs
+echo "---"
+
+# Exercício 16: Matando processos infinity
+echo -e "int main( int argc, char* argv[]) {\nfor( ; ; )\n;\n}" > infinity.c
+gcc infinity.c -o infinity
+./infinity &
+./infinity &
+./infinity &
+./infinity &
+./infinity &
+sleep 2
+ps -A | grep infinity | sed 's/^[[:space:]]*//' | cut -d ' ' -f 1 | xargs kill -9
+echo "---"
