@@ -1,0 +1,191 @@
+**Resolução da Ficha de Exercícios de C**
+
+---
+
+### **1. Compilação e Debugging (hello.c)**
+
+- **Comandos**:
+  ```bash
+  $ gcc -S hello.c       # Gera o código assembly
+  $ gcc hello.c          # Compila normalmente
+  $ gcc -o hello hello.c # Cria um executável chamado "hello"
+  $ gcc -Wall -o hello hello.c  # Exibe warnings do compilador
+  ```
+  - Sempre use `-Wall` para identificar problemas potenciais.
+- **Debugging com **``:
+  ```bash
+  $ gcc -g -o hello hello.c
+  $ gdb hello
+  gdb> break main
+  gdb> run
+  gdb> next
+  ```
+  - Isso permite executar o código passo a passo e inspecionar variáveis.
+
+---
+
+### **2. Erro no código **``
+
+- **Erro inicial**: O código usa `sin()` e `cos()` sem incluir `<math.h>`.
+- **Correção**:
+  ```c
+  #include <math.h>
+  ```
+- **Outro erro**: Alguns compiladores exigem a flag `-lm` ao compilar com funções matemáticas:
+  ```bash
+  gcc -Wall -o trig trig.c -lm
+  ```
+
+---
+
+### **3. Ponteiros (**``**)**
+
+- **Adicionando **``:
+  ```c
+  printf("i=%d, j=%d, p=%p, q=%p\n", i, j, p, q);
+  ```
+- **Comportamento esperado**:
+  - `p` e `q` armazenam endereços.
+  - O conteúdo apontado pode ser alterado indiretamente via `*p` e `*q`.
+
+---
+
+### **4. Arrays de caracteres (**``**)**
+
+- **Saída esperada**:
+  - `msg` se comporta como um ponteiro (`char*`).
+  - Cada incremento `i++` move 1 byte na memória.
+- **Explicação**:
+  ```c
+  char msg[] = "Hello World";
+  printf("%p: %c <--> %p: %c\n", &(msg[i]), msg[i], msg + i, *(msg + i));
+  ```
+
+---
+
+### **5. Arrays de inteiros (**``**)**
+
+- **Explicação**:
+  ```c
+  int primes[] = {2, 3, 5, 7, 11};
+  ```
+  - `sizeof(primes)/sizeof(int)` calcula o número de elementos.
+  - Cada incremento de `i` avança **4 bytes** (tamanho de `int` na maioria dos sistemas).
+
+---
+
+### **6. Call by Value vs. Call by Reference**
+
+- ``** (não altera valores)**:
+
+  ```c
+  void swap(int n1, int n2) {
+      int temp = n1;
+      n1 = n2;
+      n2 = temp;
+  }
+  ```
+
+  - Os valores **não são trocados** porque a função recebe **cópias** dos valores.
+
+- ``** (troca os valores)**:
+
+  ```c
+  void swap(int *p1, int *p2) {
+      int temp = *p1;
+      *p1 = *p2;
+      *p2 = temp;
+  }
+  ```
+
+  - Passamos os **endereços**, permitindo modificar as variáveis originais.
+
+---
+
+### **7. Ponteiros inválidos (**``** vs **``**)**
+
+- **Erro em **``:
+
+  ```c
+  int* get_int() {
+      int i = 2;
+      return &i; // ERRO: retornando endereço de variável local
+  }
+  ```
+
+  - `i` é destruído ao sair da função → **ponteiro inválido**.
+  - Acesso a `*p` causa **segmentation fault**.
+
+- **Solução em **``:
+
+  ```c
+  int* get_int() {
+      int *p = (int*)malloc(sizeof(int));
+      *p = 2;
+      return p;
+  }
+  ```
+
+  - O uso de `malloc()` mantém a variável válida.
+  - `` evita vazamento de memória.
+
+---
+
+### **8. Analisando uso de ponteiros**
+
+- **(1) Passagem de endereço para função**:
+
+  ```c
+  void f() {
+      int x;
+      g(&x);
+  }
+  ```
+
+  - `&x` passa um **endereço válido** da stack.
+
+- **(2) Retorno de ponteiro inválido**:
+
+  ```c
+  int* f() {
+      int x;
+      return &x;  // ERRO: `x` será destruído
+  }
+  ```
+
+  - Gera um **ponteiro inválido**.
+
+- **(3) Retorno de ponteiro válido**:
+
+  ```c
+  int* f() {
+      int* x = (int*)malloc(sizeof(int));
+      return x;
+  }
+  ```
+
+  - Correto, pois `malloc()` aloca na heap.
+
+- **(4) Ponteiro para função**:
+
+  ```c
+  int g(int (*h)(int), int y) {
+      return h(y + 2);
+  }
+
+  int f(int x) {
+      return x*x;
+  }
+
+  int main() {
+      printf("value: %d\n", g(f,2));
+      return 0;
+  }
+  ```
+
+  - `h` é um **ponteiro para função**, usado para chamar `f(x)` dinamicamente.
+
+---
+
+**FIM DA RESOLUÇÃO**
+
