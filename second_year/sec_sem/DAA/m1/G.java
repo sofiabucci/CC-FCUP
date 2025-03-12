@@ -16,6 +16,9 @@ public class G{
             tentativas[i] = in.nextLine();
             feedbacks[i] = in.nextLine();
         }
+
+
+        in.close();
     }
 
 }

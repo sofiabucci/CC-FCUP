@@ -60,6 +60,9 @@ public class F{
         } else {
             System.out.println("Nao sabemos");
         }
+
+
+        in.close();
     }
 
 }

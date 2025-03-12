@@ -6,12 +6,12 @@ public class D{
 
         int n = in.nextInt();
 
-        Map<Integer,Integer> cadeiras = new HashMap<>();
+        int[] cadeiras = new int[n+1];
 
         for(int i=0; i<n; i++){
             int t = in.nextInt();
             int v = in.nextInt();
-            cadeiras.put(t,v);
+            cadeiras[t]=v;
         }
 
         int h= in.nextInt();
@@ -19,21 +19,35 @@ public class D{
 
         for(int i=0; i<h; i++){
             int s = in.nextInt();
+            if (s==0){
+                for(int j=1; j<=n; j++){
+                    if (cadeiras[j]>0){
+                        cadeiras[j]--;
+                        p--;
+                        break;
+                    }
+                }
+                continue;
+            }
+            int[] sl = new int[s]; 
             for(int j=0; j<s; j++){
-                int c = in.nextInt();
-                if (cadeiras.getOrDefault(c, 0)>0) {
+                sl[j]= in.nextInt();
+            }
+            for(int j=0; j<s; j++){
+                if (cadeiras[sl[j]]>0){
+                    cadeiras[sl[j]]--;
                     p--;
-                    cadeiras.put(c, cadeiras.get(c)-1);
                     break;
                 }
-
             }
         }
 
-        int cl = cadeiras.values().stream().mapToInt(Integer::intValue).sum();
+        int cl = Arrays.stream(cadeiras).sum();
 
         System.out.println(p);
         System.out.println(cl);
+
+        in.close();
     }
 
 }

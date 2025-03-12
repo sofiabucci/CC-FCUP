@@ -38,5 +38,7 @@ public class E {
         }
 
         System.out.println("Perdeu = " + c);
+
+        in.close();
     }
 }
