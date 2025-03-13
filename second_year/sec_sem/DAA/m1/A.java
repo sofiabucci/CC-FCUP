@@ -6,12 +6,12 @@ public class A{
 
         int n = in.nextInt();
         int[] v = new int[n+1];
-        boolean[] visitado = new boolean[n + 1];
 
         for(int i=1; i<=n; i++){
             v[i]=in.nextInt();
         }
 
+        boolean[] visitado = new boolean[n + 1];
         List<List<Integer>> grupos = new ArrayList<>();
         int s = 0;
 
@@ -24,6 +24,7 @@ public class A{
                     visitado[atual] = true;
                     atual = v[atual];
                     grupo.add(v[atual]);
+
                 }
                 
                 if (grupo.size() >= 3) {
@@ -33,8 +34,7 @@ public class A{
                 }
             }
         }
-
-        
+ 
 
         for (List<Integer> grupo : grupos) {
             System.out.print(grupo.size()+ " ");

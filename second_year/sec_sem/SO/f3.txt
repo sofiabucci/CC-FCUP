@@ -1,0 +1,288 @@
+Respostas e Explicações da Ficha de Exercícios
+
+1. Uso da função main com argumentos:
+   - O programa imprime o número de argumentos e lista cada um deles.
+   - Código:
+     #include <stdio.h>
+     int main(int argc, char* argv[]) {
+         printf("# arguments = %d\n", argc - 1);
+         printf("the command arguments are: %s\n", argv[0]);
+         for (int i = 1; i < argc; i++)
+             printf("argv[%d]=%s\n", i, argv[i]);
+         return 0;
+     }
+
+2. Manipulação de strings com a biblioteca padrão C:
+   - O programa compara strings, cria cópias, e concatena strings.
+   - Código:
+     #include <stdio.h>
+     #include <string.h>
+     #include <stdlib.h>
+     int main(int argc, char* argv[]) {
+         int result = strcmp(argv[1], argv[2]);
+         if (result == 0)
+             printf("the strings are the same\n");
+         else if (result < 0)
+             printf("%s < %s\n", argv[1], argv[2]);
+         else
+             printf("%s > %s\n", argv[1], argv[2]);
+
+         char *p1 = strdup(argv[1]);
+         char *p2 = strdup(argv[2]);
+         printf("p1 holds:%s\n", p1);
+         printf("p2 holds:%s\n", p2);
+
+         char* p3 = (char*)malloc((strlen(argv[1]) + 1) * sizeof(char));
+         char* p4 = (char*)malloc((strlen(argv[2]) + 1) * sizeof(char));
+         strcpy(p3, argv[1]);
+         strcpy(p4, argv[2]);
+         printf("p3 holds:%s\n", p3);
+         printf("p4 holds:%s\n", p4);
+
+         char* p5 = (char*)malloc((strlen(argv[1]) + strlen(argv[2]) + 1) * sizeof(char));
+         strcpy(p5, p1);
+         strcat(p5, p2);
+         printf("p5 holds:%s\n", p5);
+
+         exit(EXIT_SUCCESS);
+     }
+
+3. Transformação de strings e busca de substrings:
+   - O programa converte strings para minúsculas, verifica ocorrências e conta substrings.
+   - Código:
+     #include <stdio.h>
+     #include <string.h>
+     #include <ctype.h>
+     void to_lowercase(char* str) {
+         for (int i = 0; str[i]; i++) {
+             str[i] = tolower(str[i]);
+         }
+     }
+     int main(int argc, char* argv[]) {
+         if (argc < 3) {
+             printf("Usage: %s <string1> <string2>\n", argv[0]);
+             return 1;
+         }
+         to_lowercase(argv[1]);
+         to_lowercase(argv[2]);
+         printf("Lowercase strings: %s, %s\n", argv[1], argv[2]);
+
+         if (strstr(argv[2], argv[1])) {
+             printf("'%s' occurs in '%s'\n", argv[1], argv[2]);
+         } else {
+             printf("'%s' does not occur in '%s'\n", argv[1], argv[2]);
+         }
+
+         int count = 0;
+         char* ptr = argv[2];
+         while ((ptr = strstr(ptr, argv[1])) != NULL) {
+             count++;
+             ptr++;
+         }
+         printf("'%s' occurs %d times in '%s'\n", argv[1], count, argv[2]);
+
+         return 0;
+     }
+
+4. Leitura de arquivos em blocos:
+   - O programa lê um arquivo em blocos de BUFFER_SIZE bytes e imprime o conteúdo.
+   - Código:
+     #include <stdio.h>
+     #include <stdlib.h>
+     #define BUFFER_SIZE 1024
+     int main(int argc, char* argv[]) {
+         if (argc < 2) {
+             printf("Usage: %s <filename>\n", argv[0]);
+             return 1;
+         }
+         FILE* file = fopen(argv[1], "r");
+         if (file == NULL) {
+             printf("error: could not open %s\n", argv[1]);
+             exit(EXIT_FAILURE);
+         }
+         char buffer[BUFFER_SIZE];
+         int nchars;
+         while ((nchars = fread(buffer, sizeof(char), BUFFER_SIZE, file)) > 0) {
+             fwrite(buffer, sizeof(char), nchars, stdout);
+         }
+         fclose(file);
+         exit(EXIT_SUCCESS);
+     }
+
+5. Criação do comando mycat:
+   - O programa imprime o conteúdo de um ou mais arquivos.
+   - Código:
+     #include <stdio.h>
+     #include <stdlib.h>
+     #define BUFFER_SIZE 1024
+     void print_file(const char* filename) {
+         FILE* file = fopen(filename, "r");
+         if (file == NULL) {
+             printf("error: could not open %s\n", filename);
+             exit(EXIT_FAILURE);
+         }
+         char buffer[BUFFER_SIZE];
+         int nchars;
+         while ((nchars = fread(buffer, sizeof(char), BUFFER_SIZE, file)) > 0) {
+             fwrite(buffer, sizeof(char), nchars, stdout);
+         }
+         fclose(file);
+     }
+     int main(int argc, char* argv[]) {
+         if (argc < 2) {
+             printf("Usage: %s <file1> [file2 ...]\n", argv[0]);
+             return 1;
+         }
+         for (int i = 1; i < argc; i++) {
+             print_file(argv[i]);
+         }
+         exit(EXIT_SUCCESS);
+     }
+
+6. Cópia de arquivos:
+   - O programa copia o conteúdo de um arquivo para outro.
+   - Código:
+     #include <stdio.h>
+     #include <stdlib.h>
+     #define BUFFER_SIZE 1024
+     int main(int argc, char* argv[]) {
+         if (argc < 3) {
+             printf("Usage: %s <source> <destination>\n", argv[0]);
+             return 1;
+         }
+         FILE* source = fopen(argv[1], "r");
+         if (source == NULL) {
+             printf("error: could not open %s\n", argv[1]);
+             exit(EXIT_FAILURE);
+         }
+         FILE* destination = fopen(argv[2], "w");
+         if (destination == NULL) {
+             printf("error: could not open %s\n", argv[2]);
+             fclose(source);
+             exit(EXIT_FAILURE);
+         }
+         char buffer[BUFFER_SIZE];
+         int nchars;
+         while ((nchars = fread(buffer, sizeof(char), BUFFER_SIZE, source)) > 0) {
+             fwrite(buffer, sizeof(char), nchars, destination);
+         }
+         fclose(source);
+         fclose(destination);
+         exit(EXIT_SUCCESS);
+     }
+
+7. Contagem de caracteres, palavras e linhas:
+   - O programa conta caracteres, palavras e linhas em um arquivo.
+   - Código:
+     #include <stdio.h>
+     #include <stdlib.h>
+     #include <string.h>
+     #include <unistd.h>
+     int main(int argc, char* argv[]) {
+         int opt;
+         int count_chars = 0, count_words = 0, count_lines = 0;
+         FILE* file;
+         char* line = NULL;
+         size_t len = 0;
+         ssize_t read;
+         while ((opt = getopt(argc, argv, "cwl")) != -1) {
+             switch (opt) {
+                 case 'c':
+                     count_chars = 1;
+                     break;
+                 case 'w':
+                     count_words = 1;
+                     break;
+                 case 'l':
+                     count_lines = 1;
+                     break;
+                 default:
+                     fprintf(stderr, "Usage: %s [-c] [-w] [-l] <file>\n", argv[0]);
+                     exit(EXIT_FAILURE);
+             }
+         }
+         if (optind >= argc) {
+             fprintf(stderr, "Expected file name after options\n");
+             exit(EXIT_FAILURE);
+         }
+         file = fopen(argv[optind], "r");
+         if (file == NULL) {
+             perror("Error opening file");
+             exit(EXIT_FAILURE);
+         }
+         while ((read = getline(&line, &len, file)) != -1) {
+             if (count_lines) count_lines++;
+             if (count_chars) count_chars += strlen(line);
+             if (count_words) {
+                 char* token = strtok(line, " \t\n");
+                 while (token != NULL) {
+                     count_words++;
+                     token = strtok(NULL, " \t\n");
+                 }
+             }
+         }
+         if (count_chars) printf("%d\n", count_chars);
+         if (count_words) printf("%d\n", count_words);
+         if (count_lines) printf("%d\n", count_lines);
+         fclose(file);
+         if (line) free(line);
+         exit(EXIT_SUCCESS);
+     }
+
+8. Divisão de texto em palavras:
+   - O programa divide uma linha de texto em palavras usando strsep.
+   - Código:
+     #include <stdio.h>
+     #include <stdlib.h>
+     #include <string.h>
+     int main(int argc, char* argv[]) {
+         if (argc < 2) {
+             printf("Usage: %s <text>\n", argv[0]);
+             return 1;
+         }
+         int count = 0;
+         char* text = strdup(argv[1]);
+         char* word;
+         while ((word = strsep(&text, " \t")) != NULL) {
+             if (*word == '\0') continue;
+             printf("%s\n", word);
+             count++;
+         }
+         printf("%d words found\n", count);
+         free(text);
+         exit(EXIT_SUCCESS);
+     }
+
+9. Busca de strings em arquivos:
+   - O programa busca uma string em um arquivo e imprime as ocorrências com as posições.
+   - Código:
+     #include <stdio.h>
+     #include <stdlib.h>
+     #include <string.h>
+     int main(int argc, char* argv[]) {
+         if (argc < 3) {
+             printf("Usage: %s <string> <file>\n", argv[0]);
+             return 1;
+         }
+         FILE* file = fopen(argv[2], "r");
+         if (file == NULL) {
+             printf("error: could not open %s\n", argv[2]);
+             exit(EXIT_FAILURE);
+         }
+         char* line = NULL;
+         size_t len = 0;
+         ssize_t read;
+         int lineno = 1;
+         while ((read = getline(&line, &len, file)) != -1) {
+             char* ptr = line;
+             while ((ptr = strstr(ptr, argv[1])) != NULL) {
+                 int col = ptr - line + 1;
+                 printf("[%d:%d]\n", lineno, col);
+                 ptr++;
+             }
+             lineno++;
+         }
+         fclose(file);
+         if (line) free(line);
+         exit(EXIT_SUCCESS);
+     }

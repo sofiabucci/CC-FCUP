@@ -27,19 +27,21 @@ public class D{
                         break;
                     }
                 }
-                continue;
             }
-            int[] sl = new int[s]; 
-            for(int j=0; j<s; j++){
-                sl[j]= in.nextInt();
-            }
-            for(int j=0; j<s; j++){
-                if (cadeiras[sl[j]]>0){
-                    cadeiras[sl[j]]--;
-                    p--;
-                    break;
+            else{
+                int[] sl = new int[s]; 
+                for(int j=0; j<s; j++){
+                    sl[j]= in.nextInt();
+                }
+                for(int j=0; j<s; j++){
+                    if (cadeiras[sl[j]]>0){
+                        cadeiras[sl[j]]--;
+                        p--;
+                        break;
+                    }
                 }
             }
+        
         }
 
         int cl = Arrays.stream(cadeiras).sum();
