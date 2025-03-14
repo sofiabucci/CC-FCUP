@@ -24,3 +24,4 @@ for keys,values in trajeto.items():
 for keys,values in sorted(nos.items()):
     x=set(values)
     print("No %d: %d" % (keys,(len(x))))
+    

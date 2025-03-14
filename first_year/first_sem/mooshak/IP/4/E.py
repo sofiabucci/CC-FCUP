@@ -47,3 +47,4 @@ else:
     p=min(alternativas)
     c=alternativas.count(p)
     print(c,p)
+    

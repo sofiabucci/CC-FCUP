@@ -3,42 +3,42 @@ import java.util.*;
 public class E {
     public static void main(String[] args) {
         Scanner in = new Scanner(System.in);
+        int k = in.nextInt();
+        int c =0;
+        int hora=0;
+        Queue<Integer> fila = new LinkedList<>();
+         
+        for(int i=0; i<k; i++){
+            int h = in.nextInt();
+            int m = in.nextInt();
+            int d = in.nextInt();
+            int tempo = (h*60)+m;
 
-        int k = in.nextInt(); 
-
-        int[] func = {9 * 60, 12 * 60, 15 * 60, 19 * 60}; 
-        Queue<Integer> filaEspera = new LinkedList<>(); 
-        int terminoAtendimento = 0; 
-        int c = 0; 
-
-        for (int i = 0; i < k; i++) {
-            int h = in.nextInt(); 
-            int m = in.nextInt(); 
-            int d = in.nextInt(); 
-
-            int t = (h * 60) + m; 
-
-            if ((t >= func[0] && t <= func[1]) || (t >= func[2] && t <= func[3])) {
-                
-                while (!filaEspera.isEmpty() && filaEspera.peek() <= t) {
-                    filaEspera.poll(); 
+            if ((tempo<9*60 || tempo>12*60) && (tempo<15*60 || tempo>19*60)){
+                c++;
+            }       
+            else {
+                while (!fila.isEmpty() && fila.peek() <= tempo) {
+                    fila.poll();
                 }
-
-                if (filaEspera.size() < 3) {
-                    int termino = Math.max(t, terminoAtendimento) + d;
-                    
-                    filaEspera.add(termino); 
-                    terminoAtendimento = termino; 
-                } else {
-                    c++; 
+                if (fila.size()==4){
+                    c++;
                 }
-            } else {
-                c++; 
+                else {
+                    if (!fila.isEmpty()){
+                        fila.offer(hora+d);
+                    }
+                    else{
+                        fila.offer(tempo+d);
+                        hora = tempo+d;
+                    }
+
+                }
             }
+    
         }
-
+        
         System.out.println("Perdeu = " + c);
-
         in.close();
     }
 }

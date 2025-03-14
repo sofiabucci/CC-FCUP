@@ -19,4 +19,5 @@ while percurso[0]!=0:
     percurso=list(map(int,input().split()))
 
 
+
     
