@@ -8,7 +8,7 @@ public class D{
 
         int[] cadeiras = new int[n+1];
 
-        for(int i=0; i<n; i++){
+        for(int i=1; i<=n; i++){
             int t = in.nextInt();
             int v = in.nextInt();
             cadeiras[t]=v;
@@ -19,35 +19,28 @@ public class D{
 
         for(int i=0; i<h; i++){
             int s = in.nextInt();
-            if (s==0){
-                for(int j=1; j<=n; j++){
-                    if (cadeiras[j]>0){
-                        cadeiras[j]--;
-                        p--;
-                        break;
-                    }
+
+            int[] sl = new int[s]; 
+
+            for(int j=0; j<s; j++){
+                sl[j]= in.nextInt();
+            }
+            
+            for(int k=0; k<s; k++){
+                if (cadeiras[sl[k]]>0){
+                    cadeiras[sl[k]]--;
+                    p--;
+                    break;
                 }
             }
-            else{
-                int[] sl = new int[s]; 
-                for(int j=0; j<s; j++){
-                    sl[j]= in.nextInt();
-                }
-                for(int j=0; j<s; j++){
-                    if (cadeiras[sl[j]]>0){
-                        cadeiras[sl[j]]--;
-                        p--;
-                        break;
-                    }
-                }
-            }
+            
         
         }
 
-        int cl = Arrays.stream(cadeiras).sum();
+        int c = Arrays.stream(cadeiras).sum();
 
         System.out.println(p);
-        System.out.println(cl);
+        System.out.println(c);
 
         in.close();
     }

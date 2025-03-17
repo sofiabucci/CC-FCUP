@@ -16,33 +16,36 @@ public class A{
         int s = 0;
 
         for (int i = 1; i <= n; i++) {
-            if (!visitado[i]) {
-                List<Integer> grupo = new ArrayList<>();
-                int atual = i;
-                
-                while (!visitado[atual]) {
-                    visitado[atual] = true;
-                    atual = v[atual];
-                    grupo.add(v[atual]);
-
-                }
-                
-                if (grupo.size() >= 3) {
-                    grupos.add(grupo);
-                } else {
-                    s+= grupo.size();
-                }
+            List<Integer> grupo = new ArrayList<>();
+            int atual = i;
+            
+            while (!visitado[atual]) {
+                visitado[atual] = true;
+                grupo.add(atual);
+                atual = v[atual];
             }
-        }
- 
+            
+            if (grupo.size() >= 3) {
+                grupos.add(grupo);
+            } 
+            else {
+                s+=grupo.size();
+            }
 
-        for (List<Integer> grupo : grupos) {
-            System.out.print(grupo.size()+ " ");
-            int m = Collections.max(grupo);
-            System.out.print(m);
-            grupo.remove(grupo.indexOf(m));
-            for (int p : grupo) {
-                System.out.print(" " + p);
+        } 
+ 
+        
+        for (List<Integer> g : grupos){
+            System.out.print(g.size()+" ");
+            int maxIndex = g.indexOf(Collections.max(g));
+            for (int i=maxIndex;i<g.size();i++){
+                System.out.print(g.get(i)+" ");
+            }
+            if (maxIndex!=0){
+                for (int i=0;i<maxIndex-1;i++){
+                    System.out.print(g.get(i)+" ");
+                }
+                System.out.print(g.get(maxIndex-1));
             }
             System.out.println();
         }

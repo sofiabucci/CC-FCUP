@@ -1,0 +1,38 @@
+Relatório do Projeto: Jogo da Vida de Conway
+
+1. Introdução
+O projeto implementa o Jogo da Vida de Conway, um autômato celular desenvolvido pelo matemático John Horton Conway em 1970. O jogo simula a evolução de células em uma grade bidimensional, onde cada célula pode estar viva ou morta, seguindo regras simples que geram padrões complexos.
+
+2. Objetivo
+O objetivo do projeto é simular a evolução de células em uma grade bidimensional, onde cada célula evolui com base no número de vizinhos vivos, seguindo as regras do Jogo da Vida.
+
+3. Funcionalidades
+- Inicialização do Mundo: O mundo é inicializado com uma lista de células vivas.
+- Evolução do Mundo: O mundo evolui para a próxima geração com base nas regras do Jogo da Vida.
+- Visualização: O estado atual do mundo é exibido em uma janela de visualização definida.
+- Loop Principal: O jogo entra em um loop infinito, onde o mundo é evoluído e exibido a cada segundo.
+
+4. Regras do Jogo da Vida
+- Sobrevivência: Uma célula viva com 2 ou 3 vizinhos vivos permanece viva.
+- Morte: Uma célula viva com menos de 2 ou mais de 3 vizinhos vivos morre.
+- Nascimento: Uma célula morta com exatamente 3 vizinhos vivos se torna viva.
+
+5. Implementação
+- Células: As células são representadas por coordenadas (X, Y).
+- Vizinhos: Para cada célula, os vizinhos são calculados nas oito direções possíveis (norte, sul, leste, oeste, noroeste, nordeste, sudoeste, sudeste).
+- Evolução: A função evolve/2 calcula o próximo estado do mundo com base no estado atual e nas regras do jogo.
+- Visualização: O mundo é exibido como uma grade de caracteres, onde células vivas são representadas por 1 e células mortas por 0.
+
+6. Estrutura do Código
+- main.pl: Inicializa o jogo com uma configuração específica de células vivas e uma janela de visualização.
+- life.pl: Contém a lógica do jogo, incluindo a definição de células, cálculo de vizinhos, evolução do mundo e visualização.
+
+7. Execução
+Para executar o projeto, basta rodar o script run.sh, que carrega o arquivo main.pl e inicia o jogo. O jogo entra em um loop infinito, exibindo o estado do mundo a cada segundo.
+
+8. Conclusão
+O projeto implementa com sucesso o Jogo da Vida de Conway, demonstrando como regras simples podem gerar comportamentos complexos. O código é modular e bem estruturado, facilitando a extensão e modificação. Futuras melhorias podem incluir a adição de diferentes configurações iniciais, suporte para grades maiores e uma interface gráfica mais elaborada.
+
+9. Referências
+- Jogo da Vida de Conway - Wikipedia: https://pt.wikipedia.org/wiki/Jogo_da_vida
+- Prolog - Wikipedia: https://pt.wikipedia.org/wiki/Prolog

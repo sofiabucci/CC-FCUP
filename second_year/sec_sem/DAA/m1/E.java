@@ -1,44 +1,43 @@
 import java.util.*;
-
+ 
 public class E {
     public static void main(String[] args) {
         Scanner in = new Scanner(System.in);
-        int k = in.nextInt();
-        int c =0;
-        int hora=0;
+
+        int clientes = in.nextInt();
+        int horaAtual = 9*60;
+        int clientesPerdidos = 0;
+
         Queue<Integer> fila = new LinkedList<>();
          
-        for(int i=0; i<k; i++){
+        for(int i=0; i<clientes; i++){
+
             int h = in.nextInt();
             int m = in.nextInt();
             int d = in.nextInt();
-            int tempo = (h*60)+m;
+            
+            int chegada = (h*60)+m;
+            int fimAtendimento = Math.min(40, d);
 
-            if ((tempo<9*60 || tempo>12*60) && (tempo<15*60 || tempo>19*60)){
-                c++;
+            if (chegada<9*60 || (chegada>12*60 && chegada<15*60) || chegada>19*60){
+                clientesPerdidos++;
             }       
             else {
-                while (!fila.isEmpty() && fila.peek() <= tempo) {
-                    fila.poll();
+                while (!fila.isEmpty() && fila.peek() <= chegada) {
+                    horaAtual = fila.poll();
                 }
                 if (fila.size()==4){
-                    c++;
+                    clientesPerdidos++;
                 }
                 else {
-                    if (!fila.isEmpty()){
-                        fila.offer(hora+d);
-                    }
-                    else{
-                        fila.offer(tempo+d);
-                        hora = tempo+d;
-                    }
-
+                    int termino = Math.max(horaAtual, chegada) + d;
+                    fila.offer(termino); 
+                    horaAtual = termino;
                 }
             }
-    
         }
         
-        System.out.println("Perdeu = " + c);
+        System.out.println("Perdeu = " + clientesPerdidos);
         in.close();
     }
 }
