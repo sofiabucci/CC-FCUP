@@ -10,12 +10,10 @@ public class F{
         int blackout = in.nextInt();
         int vencedora = in.nextInt();
 
-        Map<Integer, Integer> problemasResolvidos = new HashMap<>(); 
-        Map<Integer, Integer> tempoTotal = new HashMap<>(); 
+        Map<Integer, Map<Integer, ProblemInfo>> equipas = new HashMap<>();
 
         for (int i = 1; i <= equipas; i++) {
-            problemasResolvidos.put(i, 0);
-            tempoTotal.put(i, 0);
+            equipas.put(i, new HashMap<>());
         }
 
         for (int i = 0; i < submissoes; i++) {
@@ -24,12 +22,15 @@ public class F{
             int problema = in.nextInt();
             int resultado = in.nextInt();
 
+            Map<Integer, ProblemInfo> problemas = equipas.get(equipa);
+            problemas.putIfAbsent(problema, new ProblemInfo());
+
+            ProblemInfo info = problemas.get(problema);
             if (resultado == 1) {
-                problemasResolvidos.put(equipa, problemasResolvidos.get(equipa) + 1);
-                tempoTotal.put(equipa, tempoTotal.get(equipa) + tempo);
-            }
-            else{
-                tempoTotal.put(equipa, tempoTotal.get(equipa) + 20);
+                info.resolvido = true;
+                info.tempoResolucao = tempo;
+            } else {
+                info.submissoesErradas++;
             }
 
         }
