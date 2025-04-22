@@ -1,9 +1,4 @@
-//-----------------------------------------------------------------------______
-// Example of implementation of Dijkstra algorithm
-//
-// (assumes a weighted digraph, without negative weights)
-// Based on https://www.dcc.fc.up.pt/~pribeiro/aulas/daa2223/codigo/dijkstra.java
-//---------------------------------------------------------------------------------
+
 
 import java.util.*;
 
