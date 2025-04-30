@@ -1,104 +1,58 @@
-LIFE - Game of Life em Prolog
-================================
+Game of Life Implementation Documentation
 
-Uma implementação avançada do Jogo da Vida de Conway em Prolog com recursos para:
-- Simulações customizáveis
-- Regras modificáveis
-- Visualização em tempo real
-- Testes unitários integrados
-
-📁 Estrutura do Projeto
+1. ARCHITECTURE OVERVIEW
 -----------------------
-1. `life.pl`        - Lógica principal do jogo
-2. `life_tests.pl`  - Testes unitários
-3. `main.pl`       - Interface do usuário
+The implementation consists of two modules:
+- life.pl: Core simulation logic
+- main.pl: User interface and controls
 
-⚙️ Requisitos
-------------
-- SWI-Prolog (versão 8.x ou superior)
-- Módulos: clpfd, record, plunit
+2. WORLD REPRESENTATION
+-----------------------
+The world is represented as a structure:
+world(LiveCells, Generation)
+- LiveCells: Sorted list of cell(X,Y) terms
+- Generation: Integer count of evolution steps
 
-🚀 Como Executar
----------------
-1. Inicie o SWI-Prolog
-2. Carregue o arquivo principal:
-   ?- [main].
-3. Siga as instruções do menu
-
-🎮 Comandos Principais
----------------------
-• Iniciar simulação:
-  ?- life(glider, world_window(40,40)).
-  ?- life([cell(0,0), cell(1,1)], world_window(20,20)).
-
-• Alterar regras:
-  ?- set_rule(birth, [3,6]).  % Exemplo: HighLife (B36/S23)
-
-• Executar testes:
-  ?- run_tests.
-
-• Ajuda:
-  ?- main.
-
-🔧 Funcionalidades
+3. KEY ALGORITHMS
 -----------------
-✔️ Regras customizáveis (notação B/S)
-✔️ Padrões pré-definidos (glider, blinker)
-✔️ Estatísticas em tempo real:
-   - Células vivas
-   - Nascimentos/mortes por geração
-✔️ Visualização ajustável
-✔️ Sistema de testes robusto
+3.1 Evolution Process:
+- Collect all candidate cells (live cells + neighbors)
+- For each candidate:
+  - Count living neighbors
+  - Apply rules to determine new state
+- Filter cells that remain alive
+- Increment generation counter
 
-📊 Padrões Disponíveis
-----------------------
-• glider:
-  [cell(1,0), cell(2,1), cell(0,2), cell(1,2), cell(2,2)]
+3.2 Rule System:
+- Uses dynamic predicates for flexible rules
+- Two rule types:
+  - birth: Numbers of neighbors causing birth
+  - survival: Numbers allowing survival
+- Default: Conway's B3/S23 rules
 
-• blinker:
-  [cell(1,0), cell(1,1), cell(1,2)]
+4. VISUALIZATION
+---------------
+- Prints grid with Unicode block characters
+- Automatically adjusts to visible cells
+- Shows generation count
 
-🛠️ Como Adicionar Padrões
--------------------------
-1. Edite life.pl
-2. Adicione novas cláusulas pattern/2:
-   pattern(nome_do_padrao, [lista_de_celulas]).
+5. PERFORMANCE OPTIMIZATIONS
+---------------------------
+- Sorted cell lists for efficient membership checks
+- Candidate cell pruning (only consider relevant cells)
+- Avoid recalculating neighbors through memoization
 
-🧪 Testes Unitários
+6. EXTENSION POINTS
 ------------------
-Cobertura de testes:
-✓ Regras do jogo
-✓ Evolução do mundo
-✓ Contagem de vizinhos
-✓ Carga de padrões
+6.1 Adding New Patterns:
+- Add to pattern/2 predicate in life.pl
+- Format: pattern(name, [cell(X1,Y1), cell(X2,Y2), ...]).
 
-Para executar todos os testes:
-?- run_tests.
+6.2 Custom Rules:
+- Use set_rule/2 to modify birth/survival conditions
+- Example: set_rule(birth, [3,6]) for HighLife variant
 
-📝 Exemplo Completo
-------------------
-1. Iniciar com regras personalizadas:
-   ?- set_rule(birth, [3,6]).
-   ?- set_rule(survival, [2,3]).
-   ?- life(glider, world_window(30,30)).
-
-2. Monitorar estatísticas:
-   (Serão exibidas automaticamente a cada geração)
-
-🔄 Controles
------------
-• Pressione Ctrl+C para interromper
-• Use sleep/1 em run_simulation/2 para ajustar velocidade
-
-📈 Melhorias Futuras
--------------------
-- [ ] Grid toroidal (bordas conectadas)
-- [ ] Interface gráfica
-- [ ] Controle interativo (pausa, passo-a-passo)
-- [ ] Importação/exportação de padrões
-
-📚 Referências
--------------
-• Conway's Game of Life (1970)
-• The Art of Prolog - Sterling & Shapiro
-• Documentação SWI-Prolog
+7. USAGE EXAMPLES
+----------------
+7.1 Running Patterns:
+?- life(glider, 20).     % Run gl
