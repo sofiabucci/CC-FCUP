@@ -1,160 +1,178 @@
-:- module(life, [start/0]).
 :- use_module(library(pce)).
-:- use_module(library(lists)).
+:- dynamic cell/2.
+:- dynamic width/1, height/1.
+:- dynamic dialog_window/1, browser_window/1.
 
-% Configuração
-grid_size(50, 50).
-cell_size(10).  % Tamanho em pixels
+% Initialize grid dimensions
+width(60).  % Colunas
+height(30). % Linhas
 
-% Estruturas de dados
-:- dynamic world/1.
-:- dynamic running/1.
+% Clear all cells
+clear_cells :-
+    retractall(cell(_, _)).
 
-% Inicialização do mundo
-init_world :-
-    retractall(world(_)),
-    retractall(running(_)),
-    assert(world(world{cells:[], generation:0, stats:stats{total:0, born:0, died:0, max_pop:0}, history:[]})),
-    assert(running(false)).
+% Examples of starting patterns
+block :-
+    clear_cells,
+    assertz(cell(1,1)), assertz(cell(1,2)),
+    assertz(cell(2,2)), assertz(cell(2,1)).
 
-% Main
+blinker :-
+    clear_cells,
+    assertz(cell(1,2)), assertz(cell(2,2)), assertz(cell(3,2)).
+
+glider :-
+    clear_cells,
+    assertz(cell(4,2)), assertz(cell(2,3)),
+    assertz(cell(4,3)), assertz(cell(3,4)), assertz(cell(4,4)).
+
+% Check if a position has a cell
+is_alive(X, Y) :-
+    cell(X, Y).
+
+is_empty(X, Y) :-
+    \+ is_alive(X, Y).
+
+% Get the 8 neighbors of a position
+neighbors(X, Y, Neighbors) :-
+    X1 is X-1, Y1 is Y-1,
+    X2 is X,   Y2 is Y-1,
+    X3 is X+1, Y3 is Y-1,
+    X4 is X-1, Y4 is Y,
+    X5 is X+1, Y5 is Y,
+    X6 is X-1, Y6 is Y+1,
+    X7 is X,   Y7 is Y+1,
+    X8 is X+1, Y8 is Y+1,
+    maplist(wrap_pos, [(X1,Y1), (X2,Y2), (X3,Y3), (X4,Y4),
+                       (X5,Y5), (X6,Y6), (X7,Y7), (X8,Y8)], Neighbors).
+
+% Wrap a single position to stay within grid bounds
+wrap_pos((X,Y), (WX,WY)) :-
+    width(W),
+    height(H),
+    WX is 1 + ((X-1) mod W),
+    WY is 1 + ((Y-1) mod H).
+
+% Count live neighbors
+live_neighbors(X, Y, Count) :-
+    neighbors(X, Y, Neighbors),
+    include(is_alive_pair, Neighbors, LiveNeighbors),
+    length(LiveNeighbors, Count).
+
+is_alive_pair((X,Y)) :-
+    is_alive(X, Y).
+
+% Survivors are cells with 2 or 3 live neighbors
+survivors(Survivors) :-
+    findall((X,Y), (cell(X,Y), live_neighbors(X, Y, N), (N=2; N=3)), Survivors).
+
+% Births are empty positions with exactly 3 live neighbors
+births(Births) :-
+    findall((X,Y), (
+        cell(X1, Y1),
+        neighbors(X1, Y1, Neighbors),
+        member((X,Y), Neighbors),
+        is_empty(X, Y),
+        live_neighbors(X, Y, 3)
+    ), AllBirths),
+    sort(AllBirths, Births).
+
+% Next generation is survivors plus births
+next_generation :-
+    survivors(Survivors),
+    births(Births),
+    clear_cells,
+    assert_cells(Survivors),
+    assert_cells(Births).
+
+assert_cells([]).
+assert_cells([(X,Y)|Rest]) :-
+    assertz(cell(X, Y)),
+    assert_cells(Rest).
+
+% Single step generation with display update
+step_generation :-
+    next_generation,
+    update_display.
+
+% Visualization in a dialog window
+create_dialog :-
+    width(W),
+    height(H),
+    % Tamanho aproximado de um caractere em pixels
+    CharWidth = 10,
+    CharHeight = 16,
+    
+    % Calcular tamanho da janela
+    WindowWidth is W * CharWidth + 40,
+    WindowHeight is H * CharHeight + 60,
+    
+    % Criar a janela
+    new(D, dialog('Game of Life')),
+    send(D, size, size(WindowWidth, WindowHeight)),
+    
+    % Criar o browser para mostrar o grid
+    new(B, browser),
+    send(B, font, font(monospace, normal, 12)),
+    send(B, size, size(WindowWidth-20, WindowHeight-50)),
+    send(D, append, B),
+    
+    % Adicionar botões de controle
+    new(StartBtn, button('Iniciar', message(@prolog, start_simulation))),
+    new(StepBtn, button('Passo', message(@prolog, step_generation))),
+    new(CloseBtn, button('Fechar', message(D, destroy))),
+    send(D, append, StartBtn, right),
+    send(D, append, StepBtn, right),
+    send(D, append, CloseBtn, right),
+    
+    send(D, open),
+    asserta(dialog_window(D)),
+    asserta(browser_window(B)).
+
+update_display :-
+    browser_window(B),
+    width(W),
+    height(H),
+    findall(Line, (
+        between(1, H, Y),
+        findall(Char, (
+            between(1, W, X),
+            (is_alive(X, Y) -> Char = 'O'; Char = '.')
+        ), Chars),
+        atom_chars(Line, Chars)
+    ), Lines),
+    send(B, clear),
+    forall(member(Line, Lines), send(B, append, Line)).
+
+% Run simulation for N generations
+life(N) :-
+    update_display,
+    sleep(0.1),
+    next_generation,
+    N1 is N - 1,
+    (N1 > 0 -> life(N1); true).
+
+start_simulation :-
+    life(100).
+
+% Random cells initialization
+random_cells(N) :-
+    clear_cells,
+    width(W),
+    height(H),
+    random_cells(N, W, H).
+
+random_cells(0, _, _) :- !.
+random_cells(N, W, H) :-
+    N > 0,
+    random(1, W, X),
+    random(1, H, Y),
+    assertz(cell(X, Y)),
+    N1 is N - 1,
+    random_cells(N1, W, H).
+
+% Main entry point
 start :-
-    init_world,
-    new(@window, picture('Game of Life')),
-    send(@window, size, size(600, 600)),
-    init_controls,
-    init_grid,
-    send(@window, open).
-
-% Interface gráfica
-init_grid :-
-    cell_size(Size),
-    grid_size(W, H),
-    new(@grid, box(W*Size, H*Size)),
-    send(@grid, fill_pattern, colour(white)),
-    send(@window, display, @grid, point(50,50)).
-
-init_controls :-
-    new(@controls, dialog('Controls')),
-    send(@controls, append, button('Start/Stop', message(@prolog, toggle_run))),
-    send(@controls, append, button('Reset', message(@prolog, reset))),
-    send(@controls, append, button('Glider', message(@prolog, insert_glider))),
-    send(@window, display, @controls, point(50,5)).
-
-% Controles
-toggle_run :-
-    running(Status),
-    retract(running(_)),
-    (Status == true -> 
-        assert(running(false))
-    ; 
-        assert(running(true)),
-        run
-    ).
-
-reset :-
-    init_world,
-    send(@grid, clear).
-
-% Lógica principal
-run :-
-    running(true),
-    get_world(World),
-    next_generation(World, NewWorld),
-    update_display(NewWorld),
-    thread_send_message(main, update_done),
-    delay(0.1),
-    run.
-
-get_world(World) :-
-    world(World).
-
-set_world(World) :-
-    retract(world(_)),
-    assert(world(World)).
-
-next_generation(World, NewWorld) :-
-    world{cells:Cells, generation:Gen, stats:Stats, history:Hist} = World,
-    findall(Cell, (member(Cell, Cells), survive(2, 3, Cell, Cells)), Surviving),
-    findall(Cell, (empty_neighbor(Cells, Cell), born(3, Cell, Cells)), NewBorn),
-    append(Surviving, NewBorn, NewCells),
-    NewGen is Gen + 1,
-    update_stats(World, NewCells, NewStats),
-    append(Hist, [Cells], NewHist),
-    make_world(NewCells, NewGen, NewStats, NewHist, NewWorld).
-
-% Regras do jogo
-survive(Min, Max, Cell, Cells) :-
-    count_neighbors(Cell, Cells, Count),
-    between(Min, Max, Count).
-
-born(Req, Cell, Cells) :-
-    count_neighbors(Cell, Cells, Req).
-
-count_neighbors(cell(X,Y), Cells, Count) :-
-    findall(1, (
-        between(-1, 1, DX),
-        between(-1, 1, DY),
-        (DX =\= 0 ; DY =\= 0),
-        grid_size(W, H),
-        NX is (X + DX) mod W,
-        NY is (Y + DY) mod H,
-        member(cell(NX, NY), Cells)
-    ), Neighbors),
-    length(Neighbors, Count).
-
-empty_neighbor(Cells, cell(X,Y)) :-
-    member(cell(CX,CY), Cells),
-    between(-1, 1, DX),
-    between(-1, 1, DY),
-    (DX =\= 0 ; DY =\= 0),
-    grid_size(W, H),
-    X is (CX + DX) mod W,
-    Y is (CY + DY) mod H,
-    \+ member(cell(X,Y), Cells).
-
-% Atualização de estatísticas
-update_stats(World, NewCells, NewStats) :-
-    world{cells:Cells, stats:Stats} = World,
-    length(Cells, OldCount),
-    length(NewCells, NewCount),
-    Born is max(0, NewCount - OldCount),
-    Died is max(0, OldCount - NewCount),
-    NewStats = stats{
-        total:NewCount,
-        born:Stats.born + Born,
-        died:Stats.died + Died,
-        max_pop:max(Stats.max_pop, NewCount)
-    }.
-
-% Padrões conhecidos
-insert_glider :-
-    get_world(World),
-    world{cells:Cells} = World,
-    grid_size(W, H),
-    X is W // 2, Y is H // 2,
-    Glider = [cell(X+1,Y), cell(X,Y+1), cell(X+1,Y+1), cell(X+2,Y+1), cell(X+1,Y+2)],
-    union(Cells, Glider, NewCells),
-    set_world(World.put(cells, NewCells)),
-    update_display(World.put(cells, NewCells)).
-
-% Visualização
-update_display(World) :-
-    world{cells:Cells} = World,
-    send(@grid, clear),
-    cell_size(Size),
-    forall(
-        member(cell(X,Y), Cells),
-        (send(@grid, display, box(Size,Size), point(X*Size, Y*Size),
-         send(@box, fill_pattern, colour(black)))
-    )).
-
-% Utilitários
-make_world(Cells, Gen, Stats, Hist, world{cells:Cells, generation:Gen, stats:Stats, history:Hist}).
-
-delay(Seconds) :-
-    get_time(Now),
-    Finish is Now + Seconds,
-    repeat,
-    get_time(Now2),
-    (Now2 >= Finish -> ! ; fail).
+    random_cells(500),
+    create_dialog,
+    update_display.
