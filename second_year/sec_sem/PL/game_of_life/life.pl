@@ -5,6 +5,8 @@
 :- dynamic dialog_window/1.
 :- dynamic running/0.
 :- dynamic simulation_thread/1.
+:- dynamic max_generations/1.
+:- dynamic current_generation/1.
 
 % Grid parameters
 width(60).
@@ -95,7 +97,7 @@ create_dialog :-
     BoxSize = 15,
     GridWidth is W * BoxSize,
     GridHeight is H * BoxSize,
-    ControlWidth = 450,
+    ControlWidth = 400,
     WindowWidth is GridWidth + ControlWidth,
     WindowHeight is GridHeight,
 
@@ -131,7 +133,9 @@ create_dialog :-
     % Control elements
     send(ControlPanel, append, label(text, 'Speed (ms):')),
     send(ControlPanel, append, new(Speed, int_item(speed, 100))),
-    send(ControlPanel, append, button('Start', message(@prolog, start_simulation, Speed?selection))),
+    send(ControlPanel, append, label(text, 'Generations:')),
+    send(ControlPanel, append, new(MaxGens, int_item(generations, 100))),
+    send(ControlPanel, append, button('Start', message(@prolog, start_simulation, Speed?selection, MaxGens?selection))),
     send(ControlPanel, append, button('Stop', message(@prolog, stop_simulation))),
     send(ControlPanel, append, new(_, label(text, ''))),
     send(ControlPanel, append, label(text, 'Patterns:')),
@@ -155,34 +159,54 @@ update_display :-
         )
     ).
 
-% Simulation control using threads
-start_simulation(Speed) :-
-    stop_simulation, % Ensure any previous simulation is stopped
+% Robust simulation control with proper thread handling
+start_simulation(Speed, MaxGenerations) :-
+    stop_simulation, % Clean up any existing simulation
+    retractall(max_generations(_)),
+    retractall(current_generation(_)),
+    asserta(max_generations(MaxGenerations)),
+    asserta(current_generation(0)),
     asserta(running),
     thread_create(
-        simulation_loop(Speed),
+        (   catch(
+                simulation_loop(Speed),
+                Error,
+                (   print_message(warning, Error),
+                    stop_simulation
+                )
+            )
+        ),
         Thread,
         [detached(true)]
     ),
     asserta(simulation_thread(Thread)).
 
 stop_simulation :-
-    retract(simulation_thread(Thread)),
-    !,
-    thread_signal(Thread, abort),
-    thread_join(Thread, _),
-    retractall(running).
-stop_simulation :-
-    retractall(running).
+    retractall(running),
+    (   retract(simulation_thread(Thread)) ->
+        catch(thread_signal(Thread, abort), _, true),
+        catch(thread_join(Thread, _), _, true),
+        retractall(simulation_thread(_))
+    ;   true
+    ),
+    retractall(max_generations(_)),
+    retractall(current_generation(_)).
 
 simulation_loop(Speed) :-
-    (   running ->
+    (   running,
+        current_generation(Current),
+        max_generations(Max),
+        Current < Max
+    ->
         next_generation,
         update_display,
+        NewCurrent is Current + 1,
+        retractall(current_generation(_)),
+        asserta(current_generation(NewCurrent)),
         SleepTime is Speed/1000,
         sleep(SleepTime),
         simulation_loop(Speed)
-    ;   true
+    ;   stop_simulation
     ).
 
 % Pattern buttons
