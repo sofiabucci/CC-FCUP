@@ -3,6 +3,8 @@
 :- dynamic width/1, height/1.
 :- dynamic cell_box/3.
 :- dynamic dialog_window/1.
+:- dynamic running/0.
+:- dynamic simulation_thread/1.
 
 % Grid parameters
 width(60).
@@ -55,12 +57,12 @@ neighbors(X, Y, Neighs) :-
         wrap_pos((NX, NY), Pos)
     ), Neighs).
 
+is_alive_pair((X,Y)) :- is_alive(X,Y).
+
 live_neighbors(X, Y, Count) :-
     neighbors(X, Y, Neighs),
     include(is_alive_pair, Neighs, Alive),
     length(Alive, Count).
-
-is_alive_pair((X,Y)) :- is_alive(X,Y).
 
 survivors(Survivors) :-
     findall((X,Y), (cell(X,Y), live_neighbors(X,Y,N), (N=2; N=3)), Survivors).
@@ -87,95 +89,127 @@ assert_cells([(X,Y)|T]) :-
     assertz(cell(X,Y)),
     assert_cells(T).
 
-step_generation :-
-    next_generation,
-    update_display.
-
 % Graphical interface
 create_dialog :-
     width(W), height(H),
     BoxSize = 15,
-    % Calculate dimensions to fit everything without scrolling
     GridWidth is W * BoxSize,
     GridHeight is H * BoxSize,
-    ControlWidth = 500,  
+    ControlWidth = 450,
     WindowWidth is GridWidth + ControlWidth,
     WindowHeight is GridHeight,
 
     new(D, dialog('Game of Life')),
     send(D, size, size(WindowWidth, WindowHeight)),
-    send(D, scrollbars, none),  % Explicitly disable scrollbars
+    send(D, scrollbars, none),
 
     % Main game grid
     new(P, picture),
     send(P, size, size(GridWidth, GridHeight)),
-    send(P, scrollbars, none),  % Disable scrollbars for the picture too
+    send(P, scrollbars, none),
     send(D, append, P),
 
     % Create grid cells
     forall(between(1, W, X),
         forall(between(1, H, Y),
             (
-                X1 is (X - 0.3) * BoxSize,
-                Y1 is (Y - 1) * BoxSize,
+                XPos is (X - 1) * BoxSize,
+                YPos is (Y - 1) * BoxSize,
                 new(Box, box(BoxSize, BoxSize)),
                 send(Box, pen, 1),
                 send(Box, fill_pattern, colour(black)),
-                send(P, display, Box, point(X1, Y1)),
+                send(P, display, Box, point(XPos, YPos)),
                 asserta(cell_box(X, Y, Box))
             )
         )
     ),
 
-    % Create control panel using a dialog_group
+    % Control panel
     new(ControlPanel, dialog_group(controls)),
     send(ControlPanel, gap, size(5, 5)),
     
-    % Add controls with proper spacing
-    send(ControlPanel, append, label(text, 'Generations:')),
-    send(ControlPanel, append, new(Gens, int_item(gens, 100))),
-    send(ControlPanel, append, button('Start', message(@prolog, start_simulation, Gens?selection))),
-    send(ControlPanel, append, button('Step', message(@prolog, step_generation))),
-    send(ControlPanel, append, new(_, label(text, ''))), % Spacer
+    % Control elements
+    send(ControlPanel, append, label(text, 'Speed (ms):')),
+    send(ControlPanel, append, new(Speed, int_item(speed, 100))),
+    send(ControlPanel, append, button('Start', message(@prolog, start_simulation, Speed?selection))),
+    send(ControlPanel, append, button('Stop', message(@prolog, stop_simulation))),
+    send(ControlPanel, append, new(_, label(text, ''))),
     send(ControlPanel, append, label(text, 'Patterns:')),
     send(ControlPanel, append, button('Glider', message(@prolog, glider_pattern))),
     send(ControlPanel, append, button('Blinker', message(@prolog, blinker_pattern))),
     send(ControlPanel, append, button('Block', message(@prolog, block_pattern))),
     send(ControlPanel, append, button('Random', message(@prolog, random_pattern))),
     send(ControlPanel, append, button('Clear', message(@prolog, clear_pattern))),
-    send(ControlPanel, append, new(_, label(text, ''))), % Spacer
     send(ControlPanel, append, button('Quit', message(D, destroy))),
 
-    % Add control panel directly to dialog
     send(D, append, ControlPanel, right),
-
     send(D, open),
     asserta(dialog_window(D)).
+
 update_display :-
     forall(cell_box(X, Y, Box),
         (is_alive(X, Y) ->
             send(Box, fill_pattern, colour(green))
         ;
-            send(Box, fill_pattern, colour(red))
+            send(Box, fill_pattern, colour(darkred))
         )
     ).
 
-start_simulation(N) :-
-    simulation_loop(N).
+% Simulation control using threads
+start_simulation(Speed) :-
+    stop_simulation, % Ensure any previous simulation is stopped
+    asserta(running),
+    thread_create(
+        simulation_loop(Speed),
+        Thread,
+        [detached(true)]
+    ),
+    asserta(simulation_thread(Thread)).
 
-simulation_loop(0) :- !.
-simulation_loop(N) :-
-    step_generation,
-    sleep(0.1),
-    N1 is N - 1,
-    simulation_loop(N1).
+stop_simulation :-
+    retract(simulation_thread(Thread)),
+    !,
+    thread_signal(Thread, abort),
+    thread_join(Thread, _),
+    retractall(running).
+stop_simulation :-
+    retractall(running).
+
+simulation_loop(Speed) :-
+    (   running ->
+        next_generation,
+        update_display,
+        SleepTime is Speed/1000,
+        sleep(SleepTime),
+        simulation_loop(Speed)
+    ;   true
+    ).
 
 % Pattern buttons
-glider_pattern :- glider, update_display.
-blinker_pattern :- blinker, update_display.
-block_pattern :- block, update_display.
-random_pattern :- random_cells(500), update_display.
-clear_pattern :- clear_cells, update_display.
+glider_pattern :-
+    stop_simulation,
+    glider,
+    update_display.
+
+blinker_pattern :-
+    stop_simulation,
+    blinker,
+    update_display.
+
+block_pattern :-
+    stop_simulation,
+    block,
+    update_display.
+
+random_pattern :-
+    stop_simulation,
+    random_cells(500),
+    update_display.
+
+clear_pattern :-
+    stop_simulation,
+    clear_cells,
+    update_display.
 
 % Main entry point
 start :-
