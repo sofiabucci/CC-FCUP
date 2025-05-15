@@ -95,22 +95,28 @@ step_generation :-
 create_dialog :-
     width(W), height(H),
     BoxSize = 15,
-    WindowWidth is W * BoxSize + 550,
-    WindowHeight is H * BoxSize + 60,
+    % Calculate dimensions to fit everything without scrolling
+    GridWidth is W * BoxSize,
+    GridHeight is H * BoxSize,
+    ControlWidth = 500,  
+    WindowWidth is GridWidth + ControlWidth,
+    WindowHeight is GridHeight,
 
     new(D, dialog('Game of Life')),
     send(D, size, size(WindowWidth, WindowHeight)),
+    send(D, scrollbars, none),  % Explicitly disable scrollbars
 
     % Main game grid
     new(P, picture),
-    send(P, size, size(W * BoxSize, H * BoxSize)),
+    send(P, size, size(GridWidth, GridHeight)),
+    send(P, scrollbars, none),  % Disable scrollbars for the picture too
     send(D, append, P),
 
     % Create grid cells
     forall(between(1, W, X),
         forall(between(1, H, Y),
             (
-                X1 is (X - 1) * BoxSize,
+                X1 is (X - 0.3) * BoxSize,
                 Y1 is (Y - 1) * BoxSize,
                 new(Box, box(BoxSize, BoxSize)),
                 send(Box, pen, 1),
@@ -123,6 +129,9 @@ create_dialog :-
 
     % Create control panel using a dialog_group
     new(ControlPanel, dialog_group(controls)),
+    send(ControlPanel, gap, size(5, 5)),
+    
+    % Add controls with proper spacing
     send(ControlPanel, append, label(text, 'Generations:')),
     send(ControlPanel, append, new(Gens, int_item(gens, 100))),
     send(ControlPanel, append, button('Start', message(@prolog, start_simulation, Gens?selection))),
@@ -137,12 +146,11 @@ create_dialog :-
     send(ControlPanel, append, new(_, label(text, ''))), % Spacer
     send(ControlPanel, append, button('Quit', message(D, destroy))),
 
-    % Add control panel to dialog
+    % Add control panel directly to dialog
     send(D, append, ControlPanel, right),
 
     send(D, open),
     asserta(dialog_window(D)).
-
 update_display :-
     forall(cell_box(X, Y, Box),
         (is_alive(X, Y) ->
