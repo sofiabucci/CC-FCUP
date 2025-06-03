@@ -7,6 +7,7 @@
 :- dynamic simulation_thread/1.
 :- dynamic max_generations/1.
 :- dynamic current_generation/1.
+:- dynamic paused/0.
 
 % Grid parameters
 width(60).
@@ -14,20 +15,6 @@ height(30).
 
 % Initial patterns
 clear_cells :- retractall(cell(_, _)).
-
-block :-
-    clear_cells,
-    assertz(cell(1,1)), assertz(cell(1,2)),
-    assertz(cell(2,1)), assertz(cell(2,2)).
-
-blinker :-
-    clear_cells,
-    assertz(cell(1,2)), assertz(cell(2,2)), assertz(cell(3,2)).
-
-glider :-
-    clear_cells,
-    assertz(cell(4,2)), assertz(cell(2,3)),
-    assertz(cell(4,3)), assertz(cell(3,4)), assertz(cell(4,4)).
 
 random_cells(N) :-
     clear_cells,
@@ -91,27 +78,31 @@ assert_cells([(X,Y)|T]) :-
     assertz(cell(X,Y)),
     assert_cells(T).
 
-% Graphical interface
+% Graphical interface with dark theme
 create_dialog :-
     width(W), height(H),
     BoxSize = 15,
     GridWidth is W * BoxSize,
     GridHeight is H * BoxSize,
-    ControlWidth = 400,
+    ControlWidth = 470,
     WindowWidth is GridWidth + ControlWidth,
     WindowHeight is GridHeight,
 
     new(D, dialog('Game of Life')),
     send(D, size, size(WindowWidth, WindowHeight)),
     send(D, scrollbars, none),
+    % Dark background for main dialog
+    send(D, background, colour(grey20)),
 
     % Main game grid
     new(P, picture),
     send(P, size, size(GridWidth, GridHeight)),
     send(P, scrollbars, none),
+    % Dark background for grid
+    send(P, background, colour(grey10)),
     send(D, append, P),
 
-    % Create grid cells
+    % Create grid cells with dark theme
     forall(between(1, W, X),
         forall(between(1, H, Y),
             (
@@ -119,32 +110,51 @@ create_dialog :-
                 YPos is (Y - 1) * BoxSize,
                 new(Box, box(BoxSize, BoxSize)),
                 send(Box, pen, 1),
-                send(Box, fill_pattern, colour(black)),
+                send(Box, fill_pattern, colour(grey15)),
                 send(P, display, Box, point(XPos, YPos)),
                 asserta(cell_box(X, Y, Box))
             )
         )
     ),
 
-    % Control panel
+    % Control panel with dark theme
     new(ControlPanel, dialog_group(controls)),
     send(ControlPanel, gap, size(5, 5)),
     
-    % Control elements
-    send(ControlPanel, append, label(text, 'Speed (ms):')),
+    % Control elements with dark theme styling
+    new(SpeedLabel, label(text, 'Speed (ms):')),
+    send(SpeedLabel, colour, colour(white)),
+    send(ControlPanel, append, SpeedLabel),
+    
     send(ControlPanel, append, new(Speed, int_item(speed, 100))),
-    send(ControlPanel, append, label(text, 'Generations:')),
+    
+    new(GenLabel, label(text, 'Generations:')),
+    send(GenLabel, colour, colour(white)),
+    send(ControlPanel, append, GenLabel),
+    
     send(ControlPanel, append, new(MaxGens, int_item(generations, 100))),
-    send(ControlPanel, append, button('Start', message(@prolog, start_simulation, Speed?selection, MaxGens?selection))),
-    send(ControlPanel, append, button('Stop', message(@prolog, stop_simulation))),
-    send(ControlPanel, append, new(_, label(text, ''))),
-    send(ControlPanel, append, label(text, 'Patterns:')),
-    send(ControlPanel, append, button('Glider', message(@prolog, glider_pattern))),
-    send(ControlPanel, append, button('Blinker', message(@prolog, blinker_pattern))),
-    send(ControlPanel, append, button('Block', message(@prolog, block_pattern))),
-    send(ControlPanel, append, button('Random', message(@prolog, random_pattern))),
-    send(ControlPanel, append, button('Clear', message(@prolog, clear_pattern))),
-    send(ControlPanel, append, button('Quit', message(D, destroy))),
+    
+    % Dark themed buttons
+    new(StartBtn, button('Start', message(@prolog, start_simulation, Speed?selection, MaxGens?selection))),
+    send(ControlPanel, append, StartBtn),
+    
+    new(PauseBtn, button('Pause', message(@prolog, pause_simulation))),
+    send(ControlPanel, append, PauseBtn),
+    
+    new(NextBtn, button('Next', message(@prolog, next_generation), update_display)),
+    send(ControlPanel, append, NextBtn),
+    
+    new(StopBtn, button('Stop', message(@prolog, stop_simulation))),
+    send(ControlPanel, append, StopBtn),
+    
+    new(RandomBtn, button('Random', message(@prolog, random_pattern))),
+    send(ControlPanel, append, RandomBtn),
+    
+    new(ClearBtn, button('Clear', message(@prolog, clear_pattern))),
+    send(ControlPanel, append, ClearBtn),
+    
+    new(QuitBtn, button('Quit', message(D, destroy))),
+    send(ControlPanel, append, QuitBtn),
 
     send(D, append, ControlPanel, right),
     send(D, open),
@@ -153,17 +163,20 @@ create_dialog :-
 update_display :-
     forall(cell_box(X, Y, Box),
         (is_alive(X, Y) ->
-            send(Box, fill_pattern, colour(green))
+            % Bright cyan for alive cells
+            send(Box, fill_pattern, colour(darkcyan))
         ;
-            send(Box, fill_pattern, colour(darkred))
+            % Dark grey for dead cells
+            send(Box, fill_pattern, colour(grey15))
         )
     ).
 
-% Robust simulation control with proper thread handling
+% Simulation control
 start_simulation(Speed, MaxGenerations) :-
-    stop_simulation, % Clean up any existing simulation
+    stop_simulation,
     retractall(max_generations(_)),
     retractall(current_generation(_)),
+    retractall(paused),
     asserta(max_generations(MaxGenerations)),
     asserta(current_generation(0)),
     asserta(running),
@@ -181,8 +194,17 @@ start_simulation(Speed, MaxGenerations) :-
     ),
     asserta(simulation_thread(Thread)).
 
+pause_simulation :-
+    (   paused ->
+        retractall(paused),
+        send(@display, inform, 'Simulation resumed')
+    ;   asserta(paused),
+        send(@display, inform, 'Simulation paused')
+    ).
+
 stop_simulation :-
     retractall(running),
+    retractall(paused),
     (   retract(simulation_thread(Thread)) ->
         catch(thread_signal(Thread, abort), _, true),
         catch(thread_join(Thread, _), _, true),
@@ -198,33 +220,22 @@ simulation_loop(Speed) :-
         max_generations(Max),
         Current < Max
     ->
-        next_generation,
-        update_display,
-        NewCurrent is Current + 1,
-        retractall(current_generation(_)),
-        asserta(current_generation(NewCurrent)),
-        SleepTime is Speed/1000,
-        sleep(SleepTime),
-        simulation_loop(Speed)
+        (   paused ->
+            sleep(0.1),
+            simulation_loop(Speed)
+        ;   next_generation,
+            update_display,
+            NewCurrent is Current + 1,
+            retractall(current_generation(_)),
+            asserta(current_generation(NewCurrent)),
+            SleepTime is Speed/1000,
+            sleep(SleepTime),
+            simulation_loop(Speed)
+        )
     ;   stop_simulation
     ).
 
 % Pattern buttons
-glider_pattern :-
-    stop_simulation,
-    glider,
-    update_display.
-
-blinker_pattern :-
-    stop_simulation,
-    blinker,
-    update_display.
-
-block_pattern :-
-    stop_simulation,
-    block,
-    update_display.
-
 random_pattern :-
     stop_simulation,
     random_cells(500),
