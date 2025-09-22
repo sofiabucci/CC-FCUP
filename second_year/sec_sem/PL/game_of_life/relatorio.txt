@@ -1,0 +1,131 @@
+RELATÓRIO COMPLETO: GAME OF LIFE EM PROLOG
+===========================================
+
+1. INTRODUÇÃO
+-------------
+Implementação do autômato celular "Game of Life" (John Conway) em Prolog com interface gráfica XPCE. Simula a evolução de células em uma grade 2D com regras simples que geram comportamentos complexos.
+
+2. MOTIVAÇÃO
+------------
+2.1. Objetivos Educacionais:
+- Aprofundar conhecimento em Prolog além de aplicações básicas
+- Explorar integração entre paradigma lógico e OO (XPCE)
+- Implementar algoritmos de vizinhança e sistemas dinâmicos
+
+2.2. Desafios Técnicos:
+- Gerenciamento de estado global em programa lógico
+- Sincronização entre simulação contínua e interface
+- Otimização para grades de grandes dimensões
+
+2.3. Aplicações Práticas:
+- Modelagem de fenômenos biológicos simples
+- Ferramenta para ensino de teoria de autômatos
+- Base para simulações mais complexas
+
+3. CARACTERÍSTICAS TÉCNICAS
+---------------------------
+3.1. Lógica Principal:
+- Representação: fatos dinâmicos cell(X,Y)
+- Regras:
+  * Sobrevivência: 2-3 vizinhos
+  * Nascimento: exatamente 3 vizinhos
+  * Morte: solidão (<2) ou superpopulação (>3)
+- Algoritmo:
+  1. Calcula sobreviventes (survivors/1)
+  2. Identifica novos nascimentos (births/1)
+  3. Atualiza base de fatos
+
+3.2. Interface Gráfica:
+- Grade visual com células quadradas
+- Tema escuro para melhor visualização
+- Controles interativos:
+  * Start/Pause/Next
+  * Velocidade ajustável
+  * Gerador aleatório
+  * Limpar grade
+
+3.3. Inovações:
+- Wrap-around (bordas infinitas)
+- Thread dedicada para simulação
+- Atualização visual otimizada
+
+4. ARQUITETURA DO SISTEMA
+-------------------------
+4.1. Componentes:
+- Módulo Lógico:
+  * Gerenciamento do estado do jogo
+  * Cálculo de novas gerações
+
+- Módulo Gráfico:
+  * Visualização da grade
+  * Renderização de células
+
+- Módulo de Controle:
+  * Gestão de threads
+  * Sincronização de eventos
+
+4.2. Fluxo Principal:
+- Usuário interage com interface
+- Controle inicia thread de simulação
+- Lógica calcula próxima geração
+- Interface atualiza display
+- Repete até condição de parada
+
+5. COMPARAÇÃO COM REFERÊNCIAS
+-----------------------------
+5.1. Pontos Fortes:
+- Controles mais completos (velocidade, pausa)
+- Implementação de wrap-around
+- Código melhor organizado
+- Tratamento robusto de bordas
+
+5.2. Melhorias Possíveis:
+- Adicionar padrões clássicos (Glider, etc.)
+- Implementar zoom/pan na grade
+- Incluir estatísticas em tempo real
+- Adicionar exportação de padrões
+
+6. LIMITAÇÕES
+-------------
+6.1. Atuais:
+- Performance em grades muito grandes
+- Ausência de histórico de estados
+- Dificuldade em debugar threads
+
+6.2. Soluções Propostas:
+- Otimizar algoritmo de vizinhança
+- Implementar sistema de log
+- Adicionar modo debug passo a passo
+
+7. CONCLUSÃO
+------------
+O projeto demonstra com sucesso:
+- Capacidade de Prolog para simulações complexas
+- Eficácia da integração Prolog/XPCE
+- Potencial como ferramenta educacional
+
+Próximos passos:
+- Adicionar mais padrões pré-definidos
+- Implementar exportação de imagens
+- Otimizar para grades maiores
+
+8. INSTRUÇÕES DE USO
+---------------------
+8.1. Requisitos:
+   - SWI-Prolog com XPCE
+
+8.2. Comandos:
+   ?- [game_of_life].
+   ?- start.
+
+8.3. Controles:
+   - Start: Inicia simulação
+   - Pause/Resume: Alterna estado
+   - Next: Avança uma geração
+   - Random: Gera padrão aleatório
+   - Clear: Limpa a grade
+   - Speed: Ajusta velocidade
+
+9. REFERÊNCIAS
+---------------
+- Conway, J. (1970). "

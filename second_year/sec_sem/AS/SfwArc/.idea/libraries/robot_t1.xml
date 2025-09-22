@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="robot_t1">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/robot_t1/RobocodeLab.jar!/" />
+      <root url="jar://$PROJECT_DIR$/robot_t1/CapitaoBrasil.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
