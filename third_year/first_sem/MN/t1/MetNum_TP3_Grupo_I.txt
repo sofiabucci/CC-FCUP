@@ -12,7 +12,8 @@ O presente trabalho aborda três problemas fundamentais em análise numérica:
 A motivação central reside na compreensão prática dos limites da computação numérica e na avaliação de estratégias para controle de erro em cálculos iterativos.
 
 **2. MÉTODOS USADOS NO TRABALHO**
-
+**Questão 4 - Erro absoluto efetivo:**
+Os programas das questões 2 e 3 foram modificados para imprimir o erro absoluto efetivamente cometido no cálculo de π, ou seja, E = |π - S| para cada valor de ε testado. Isso permite avaliar diretamente a precisão das aproximações obtidas.
 **2.1 Fundamentação Matemática**
 
 **Questão 1 - Épsilon da Máquina:**
@@ -27,7 +28,9 @@ Implementa a série: S = 4 × Σ [ (-1)^k / (2k + 1) ]
 Propriedade: série alternada com termos decrescentes em valor absoluto, onde o erro é limitado pelo primeiro termo negligenciado.
 
 **2.2 Programas Desenvolvidos**
-
+// ...existing code...
+// Em ambos os programas, a seguinte linha foi adicionada para destacar o erro absoluto efetivo:
+// printf("Erro absoluto efetivo (|π - S|): %.15f\n\n", fabs(pi - S));
 **2.2.1 Cálculo do Épsilon da Máquina**
 
 ```c
@@ -110,10 +113,12 @@ Todos os programas incluem:
 
 **3.1 Resolução dos Problemas**
 
+
 Os problemas foram resolvidos com sucesso:
 - Épsilon da máquina calculado corretamente: 2.220446e-16
 - Ambas as séries convergem para π dentro das tolerâncias especificadas
 - Critérios de parada garantem erro controlado
+- O erro absoluto efetivo é impresso para cada aproximação, conforme solicitado na questão 4
 
 **3.2 Análise dos Resultados**
 
