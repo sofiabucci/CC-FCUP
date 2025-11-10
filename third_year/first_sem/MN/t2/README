@@ -1,4 +1,61 @@
-# 2 - Determinação da Raiz de x³ + 4x² - 10 = 0
+# 1 - Determinação da Raiz de `F(x) = sin(x²) + 1.1 - e⁻ˣ`
+
+O objetivo deste projeto é determinar raízes da função
+
+F(x) = sin(x²) + 1.1 - e⁻ˣ
+
+usando os métodos numéricos iterativos **Método da Bisseção** e o **Método de Newton**, após identificar intervalos candidatos contendo a raiz.
+
+O processo inclui duas etapas principais:
+
+1. **Detecção do intervalo contendo a raiz**: feito pela função `Raiz`, que verifica subintervalos de tamanho ( k = 0.01 ) onde a função muda de sinal.
+2. **Refinamento da raiz**: com métodos iterativos (Bisseção ou Newton), usando o intervalo detectado.
+
+---
+
+## Implementação
+
+A implementação segue a estrutura:
+
+* `F(x)` – função alvo
+* `F_derivada(x)` – derivada de `F(x)` para o método de Newton
+* `Raiz(xmin, xmax)` – encontra um intervalo onde a função muda de sinal
+* `Bissecao(a, b, eps)` – método da bisseção
+* `Newton(a, b, eps, x0)` – método de Newton-Raphson
+
+O código principal solicita ao usuário os limites do intervalo e depois aplica os métodos numéricos.
+
+### Parâmetros utilizados
+
+* `xmin, xmax` – limites do intervalo fornecido pelo usuário
+* `eps` – precisão desejada para o método iterativo
+* `k = 0.01` – tamanho do subintervalo na detecção de raiz
+* `x0` – valor inicial para o método de Newton (opcional; se não fornecido, pode-se usar o centro do intervalo)
+
+---
+
+## Código-Fonte
+
+---
+
+## Resultados Obtidos
+
+---
+
+## Resultados e Análise
+
+
+---
+
+## Conclusão
+
+
+
+
+
+
+
+# 2 - Determinação da Raiz de `x³ + 4x² - 10 = 0`
 
 ## Método Iterativo Simples
 
