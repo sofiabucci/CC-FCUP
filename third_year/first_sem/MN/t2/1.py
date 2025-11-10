@@ -31,7 +31,7 @@ def Bissecao(a, b, eps):
     if fa*fb >= 0 and dfa*dfb <= 0:
         raise ValueError("F(a) e F(b) devem ter sinais opostos e as suas derivadas o mesmo sinal. Método da bisseção abortado.")   
     else:
-        print(" F(a) e F(b) têm sinais opostos, e F'(a), F'(b) têm o mesmo sinal — condições verificadas para a bisseção.")
+        print(" F(a) e F(b) têm sinais opostos, F'(a) e F'(b) têm o mesmo sinal — condições verificadas para a bisseção.")
     iteracoes = 0
     while (b-a)/2 > eps:
         c = (a+b)/2
@@ -78,7 +78,7 @@ def Newton(a, b, eps, x0=None):
     if fa*fb >= 0 and dfa*dfb <= 0:
         raise ValueError("F(a) e F(b) devem ter sinais opostos e as suas derivadas o mesmo sinal. Método de Newton abortado.")   
     else:
-        print(" F(a) e F(b) têm sinais opostos, e F'(a), F'(b) têm o mesmo sinal — condições verificadas para Newton.")
+        print(" F(a) e F(b) têm sinais opostos, F'(a) e F'(b) têm o mesmo sinal — condições verificadas para Newton.")
     if x0 is None:
         x0 = (a+b)/2
     m_erro = Majorante_erro(a, b)
@@ -103,18 +103,17 @@ def Newton(a, b, eps, x0=None):
 
 """
 Plota o gráfico de F(x) e encontra automaticamente o primeiro intervalo onde há mudança de sinal
+Recebe xmin, xmax, espacamento, todos float
 Retorna (a, b) desse intervalo
 """
-def Plotar_e_encontrar_raiz(xmin=-2, xmax=2, passo=0.01):
+def Plotar_e_encontrar_raiz(xmin=-2, xmax=2, espacamento=0.01):
     xs = []
     ys = []
     x = xmin
     while x <= xmax:
         xs.append(x)
         ys.append(F(x))
-        x += passo
-    
-    # Plotar gráfico
+        x += espacamento
     plt.figure(figsize=(8,5))
     plt.axhline(0, color='black', linewidth=1)
     plt.plot(xs, ys, label="F(x)")
@@ -124,8 +123,6 @@ def Plotar_e_encontrar_raiz(xmin=-2, xmax=2, passo=0.01):
     plt.legend()
     plt.grid(True)
     plt.show()
-
-    # Procurar o primeiro intervalo com mudança de sinal
     for i in range(len(xs)-1):
         if ys[i] * ys[i+1] < 0:
             print(f"Raiz encontrada aproximadamente entre {xs[i]:.2f} e {xs[i+1]:.2f}")
@@ -134,7 +131,10 @@ def Plotar_e_encontrar_raiz(xmin=-2, xmax=2, passo=0.01):
     sys.exit()
 
 """
-Função principal
+Função principal, determina um subintervalo onde existe mudança de sinal, verifica se a raiz está contida 
+num intervalo de largura 0.1, aplica ambos os métodos (Bisseção e Newton) e apresenta resultados obtidos.
+Sem inputs
+Retorna o subintervalo onde se encontra a raiz, aproximação por bisseção e Newton, erros majorados e números de iterações
 """
 if __name__ == "__main__":
     print("=== Determinação automática do intervalo I ===")
@@ -143,10 +143,8 @@ if __name__ == "__main__":
     a = c - 0.05
     b = c + 0.05
     print(f"Intervalo I definido automaticamente: [{a:.4f}, {b:.4f}] (amplitude = {b-a:.2f})")
-
     eps = 1e-9
     x0 = (a+b)/2
-
     print("\n Método da Bisseção ")
     x_bissecao, erro_b, it_b = Bissecao(a, b, eps)
     print(f"Resultado Bisseção: x = {x_bissecao:.12f} | erro <= {erro_b:.2e} | iterações = {it_b}")

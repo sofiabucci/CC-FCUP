@@ -1,10 +1,10 @@
 #include <stdio.h>  
 #include <math.h>   
 
-#define EPSILON 1e-12 // Tolerância para o critério de parada do método
-#define MAX 1000 // número máximo de iterações
+#define EPSILON 1e-12 
+#define MAX 1000 
 
-// Funções
+"""Funções"""
 double g1(double x) {
     return (x - pow(x, 3) - 4 * pow(x, 2) + 10);
 }
@@ -25,49 +25,54 @@ double g5(double x) {
     return (2 * pow(x, 3) + 4 * pow(x, 2) + 10) / (3 * pow(x, 2) + 8 * x);
 }
 
-// Função genérica para realizar o método iterativo de ponto fixo
+"""
+Função genérica para realizar o método iterativo de ponto fixo
+
+O método iterativo funciona da seguinte forma:
+1. Começa com um chute inicial x0.
+2. Calcula a próxima iteração x1 = g(x0).
+3. Verifica se x1 é indefinido, infinito ou se a diferença |x1 - x0| < EPSILON.
+4. Se atingiu MAX iterações, interrompe.
+5. Caso contrário, x0 recebe x1 e o processo se repete.
+6. Para cada função, o programa imprime os valores de x em cada iteração, 
+   indicando se convergiu ou divergiu.
+"""
+
 void iterativo(double (*funcao)(double)) {
-    double x0 = 1.5;  // chute inicial
-    double x1;        // valor da próxima iteração
-    int iter = 0;     // contador de iterações
+    double x0 = 1.5;  
+    double x1;        
+    int iter = 0;     
         
     do {
-        x1 = funcao(x0);  // aplica a função iterativa g(x)
-        iter++;           // incrementa o contador
+        x1 = funcao(x0);  
+        iter++;           
 
-        // imprime o valor encontrado na iteração atual
         printf("x%d = %.10f\n", iter, x1);
 
-        // verifica se atingiu o número máximo de iterações
         if (iter >= MAX) {
             printf("Não convergiu em %d iterações\n", MAX);
-            break;  // sai do laço
+            break;  
         }
 
-        // verifica se o valor se tornou indefinido ou infinito (divergência)
         if (isnan(x1) || isinf(x1)) {
             printf("Divergiu\n");
             break;
         }
 
-        // critério de parada: diferença entre duas iterações sucessivas < EPSILON
         if (fabs(x1 - x0) < EPSILON) {
             printf("Convergiu em %d iterações\n", iter);
             break;
         }
 
-        // atualiza o valor de x0 para a próxima iteração
         x0 = x1;
 
-    } while (1);  // repete até convergir ou divergir
+    } while (1);  
     
-    printf("\n");  // linha em branco para separar os resultados
+    printf("\n");  
 }
 
-// Função principal
 int main() {
 
-    // Testa o método com cada uma das funções definidas
     iterativo(g1);
     iterativo(g2);
     iterativo(g3);

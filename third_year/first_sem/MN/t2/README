@@ -70,7 +70,7 @@ Resultado Newton:   x = -0.105348853348 | erro <= 1.81e-15 | iterações = 2
 * O projeto demonstra a importância de escolher o método numérico adequado dependendo da função e do intervalo inicial.
 
 
-
+---
 
 # 2 - Determinação da Raiz de `x³ + 4x² - 10 = 0`
 
