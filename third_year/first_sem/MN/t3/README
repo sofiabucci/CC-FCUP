@@ -1,86 +1,150 @@
-# 2 - Interpolação da Evaporação em Adelaide, Austrália
 
-O objetivo desta análise é construir e comparar duas aproximações para os dados de evaporação da água em Adelaide, Austrália, usando **interpolação polinomial** e **spline cúbico natural**. Os dados representam medições médias de evaporação (em polegadas) ao longo de 12 meses.
+# Interpolação Numérica — Exercícios Resolvidos
 
-## Dados do Problema
+Este documento reúne a análise e implementação de métodos de interpolação aplicados a dois conjuntos de dados distintos:  
+(1) dados populacionais da cidade de Tulsa e  
+(2) medições de evaporação em Adelaide, Austrália.  
+
+Em ambos os casos, foram desenvolvidos e comparados métodos clássicos da interpolação, como o **Polinómio Interpolador de Newton** e o **Spline Cúbico Natural**, destacando diferenças, vantagens e limitações.
+
+---
+
+# 1 — Interpolação da População de Tulsa
+
+Nesta questão foi construída uma aproximação polinomial para os dados históricos da população de Tulsa.  
+O objetivo principal foi determinar o polinómio interpolador que passa exatamente pelos valores fornecidos e analisar o seu comportamento, tanto dentro como fora do intervalo dos dados.
+
+## 1.1 Objetivo
+
+- Determinar o polinómio interpolador da população de Tulsa usando **Diferenças Divididas de Newton**.  
+- Avaliar o polinómio em diversos pontos e analisar a sua estabilidade.  
+- Observar a adequação do método para previsão e extrapolação.
+
+## 1.2 Metodologia
+
+1. Construção da tabela de **diferenças divididas**.  
+2. Obtenção dos coeficientes do polinómio interpolador.  
+3. Avaliação do polinómio numa malha de pontos.  
+4. Comparação entre os valores reais e os gerados pelo modelo.  
+5. Representação gráfica do resultado.
+
+## 1.3 Resultados
+
+- O polinómio passa exatamente por todos os dados fornecidos.  
+- Entre os pontos conhecidos, o comportamento é suave e consistente.  
+- Fora do intervalo amostrado, surgem oscilações significativas, típicas de interpolação polinomial de grau elevado.  
+- O método de Newton mostrou-se eficiente e estável para este conjunto de dados.
+
+## 1.4 Conclusão
+
+Embora a interpolação polinomial permita reconstruir perfeitamente os valores amostrados, o modelo não é adequado para **extrapolação**, devido às oscilações acentuadas fora do intervalo dos dados.  
+O resultado obtido é consistente com o esperado para polinómios de grau elevado.
+
+---
+
+# 2 — Interpolação da Evaporação em Adelaide, Austrália
+
+Esta questão tem como finalidade analisar dados médios mensais de evaporação (em polegadas) na cidade de Adelaide.  
+Foram utilizadas duas abordagens de interpolação:  
+- o **Polinómio Interpolador de Newton**,  
+- e o **Spline Cúbico Natural**,  
+permitindo comparar o comportamento e a adequação de cada método.
+
+## 2.1 Dados do Problema
 
 | Mês | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 |
 |-----|---|---|---|---|---|---|---|---|---|----|----|----|
-| Evaporação | 8.6 | 7.0 | 6.4 | 4.0 | 2.8 | 1.8 | 1.8 | 2.1 | 3.2 | 4.7 | 6.2 | 7.6 |
+| Evaporação (pol.) | 8.6 | 7.0 | 6.4 | 4.0 | 2.8 | 1.8 | 1.8 | 2.1 | 3.2 | 4.7 | 6.2 | 7.6 |
 
-## Métodos Implementados
+---
 
-### 2.1 Polinómio Interpolador de Newton
-- **Grau do polinómio**: 11 (para 12 pontos)
-- **Formulação**: 
-  ```
-  p(x) = f[x₀] + f[x₀,x₁](x-x₀) + f[x₀,x₁,x₂](x-x₀)(x-x₁) + ... + f[x₀,...,x₁₁](x-x₀)...(x-x₁₀)
-  ```
-- **Vantagem**: Passa exatamente por todos os pontos
-- **Desvantagem**: Pode apresentar oscilações excessivas (Fenómeno de Runge)
+# 2.2 Métodos Utilizados
 
-### 2.2 Spline Cúbico Natural
+## Polinómio Interpolador de Newton
 
-- **Características**:
-  - Função continuamente diferenciável até segunda ordem (C²)
-  - Segunda derivada nula nos extremos (condição natural)
-  - Cada segmento é um polinómio cúbico
-- **Sistema resolvido**: Sistema tridiagonal para as segundas derivadas Mᵢ
-  ```
-  [ 1     0     0   ...  0   ] [M₀]   [    0    ]
-  [ h₀/6  2h₁/3  h₁/6 ... 0   ] [M₁]   [   D₁   ]
-  [ 0     h₁/6  2h₂/3 ... 0   ] [M₂] = [   D₂   ]
-  [ ...   ...   ...   ... ... ] [...]   [  ...   ]
-  [ 0     0     0   ...  1   ] [M_n]   [    0    ]
-  ```
-- **Vantagem**: Curva suave e natural, evita oscilações
+- Utiliza diferenças divididas para obter os coeficientes.  
+- O polinómio obtido é de grau 11 (12 pontos → grau 11).  
+- A construção segue a forma geral:
 
-## Implementação
+```
 
-A implementação inclui funções para:
+p(x) = f[x₀] + f[x₀,x₁](x−x₀) + f[x₀,x₁,x₂](x−x₀)(x−x₁) + ... + f[x₀,...,x₁₁](x−x₀)…(x−x₁₀)
 
-- `calcular_diferencas_divididas(x, y)` - Constrói tabela de diferenças divididas
-- `polinomio_newton(x, y, x_avaliacao)` - Avalia polinómio interpolador
-- `construir_spline_cubico_natural(x, y)` - Constrói spline cúbico natural
-- `avaliar_spline(splines, x_avaliacao)` - Avalia spline em ponto específico
-- `resolver_sistema_tridiagonal(a, b, c, d)` - Resolve sistema tridiagonal
+```
 
-## Resultados e Análise
+**Vantagem:** passa exatamente por todos os dados.  
+**Desvantagens:** sujeito a oscilações acentuadas (Fenómeno de Runge).
 
-### Comportamento Observado no Gráfico
+---
 
-**Polinómio Interpolador (Linha Vermelha Tracejada)**:
-- Apresenta oscilações significativas entre os meses 5-9
-- Produz valores negativos em alguns pontos (não físicos para evaporação)
-- Demonstra o **Fenómeno de Runge** característico de polinómios de alto grau
+## Spline Cúbico Natural
 
-**Spline Cúbico Natural (Linha Azul Sólida)**:
-- Curva suave e monotónica entre pontos consecutivos
-- Mantém comportamento físico realista (valores sempre positivos)
-- Transições suaves entre os diferentes regimes de evaporação
+- Conjunto de polinómios cúbicos definidos em cada intervalo.  
+- Suavidade garantida até à segunda derivada.  
+- Segunda derivada igual a zero nos extremos (condição natural).  
+- Requer solução de um sistema tridiagonal.
 
-### Análise Quantitativa
+**Vantagens:**  
+- Produz curvas suaves e fisicamente realistas.  
+- Minimiza oscilações entre pontos consecutivos.  
 
-| Característica | Polinómio Newton | Spline Cúbico |
-|----------------|------------------|---------------|
-| Continuidade | C∞ (suave) | C² (suave até 2ª derivada) |
-| Oscilações | Muitas e amplas | Mínimas |
-| Valores negativos | Presentes | Ausentes |
-| Comportamento físico | Não realista | Realista |
+---
 
-## Conclusão
+# 2.3 Implementação
 
-Para dados meteorológicos como a evaporação:
+Foram desenvolvidas as seguintes funções:
 
-**✅ SPLINE CÚBICO NATURAL é a escolha recomendada** porque:
-- Produz curva suave e natural que reflete o comportamento físico real
-- Evita oscilações não realistas do polinómio de alto grau
-- Mantém valores fisicamente plausíveis (sem evaporação negativa)
-- Mais estável numericamente e computacionalmente eficiente
+- `calcular_diferencas_divididas(x, y)` – gera tabela de diferenças divididas  
+- `polinomio_newton(x, y, x_avaliacao)` – avalia o polinómio interpolador  
+- `resolver_sistema_tridiagonal(a, b, c, d)` – algoritmo de Thomas  
+- `construir_spline_cubico_natural(x, y)` – constrói os coeficientes dos splines  
+- `avaliar_spline(splines, x_avaliacao)` – avalia o spline num ponto específico  
 
-**❌ POLINÓMIO INTERPOLADOR apresenta problemas**:
-- Fenómeno de Runge causa oscilações excessivas entre pontos
-- Pode gerar valores negativos (fisicamente impossíveis)
-- Comportamento não representa adequadamente fenómenos naturais suaves
+---
 
-A análise gráfica confirma que o spline cúbico natural fornece uma representação mais fiel e fisicamente consistente da evaporação ao longo do ano, sendo portanto o método mais adequado para este tipo de dados.
+# 2.4 Resultados e Análise
+
+## Comportamento Observado
+
+### Polinómio Interpolador
+- Oscilações significativas entre os meses 5 e 9.  
+- Pode gerar valores negativos → não faz sentido fisicamente.  
+- Demonstra claramente o **Fenómeno de Runge**.
+
+### Spline Cúbico Natural
+- Curva contínua e suavizada.  
+- Mantém valores sempre positivos e coerentes com os dados meteorológicos.  
+- Representação mais fiel do comportamento gradual da evaporação.
+
+## Comparação Direta
+
+| Característica         | Polinómio Newton       | Spline Cúbico Natural |
+|------------------------|-------------------------|------------------------|
+| Suavidade              | Alta, mas instável      | Suave (C²) e estável   |
+| Oscilações             | Muitas                  | Poucas ou inexistentes |
+| Valores negativos      | Possíveis               | Nunca                  |
+| Realismo físico        | Baixo                   | Alto                   |
+| Estabilidade numérica  | Fraca em grau elevado   | Forte                  |
+
+---
+
+# 2.5 Conclusão
+
+Os resultados demonstram que:
+
+- O **Spline Cúbico Natural** é a opção mais adequada para modelar fenómenos físicos suaves, como evaporação.  
+- O **Polinómio Interpolador de Newton** funciona bem apenas para reconstruir exatamente os pontos dados, mas falha na representação realista do comportamento entre eles.
+
+No caso dos dados de Adelaide, o spline cúbico natural fornece uma curva fisicamente consistente, sem oscilações artificiais, representando de forma muito mais fiel o comportamento anual da evaporação.
+
+---
+
+# Conclusão Geral
+
+A interpolação polinomial e a interpolação spline são ferramentas poderosas, mas com aplicações ideais distintas:
+
+- **Polinómios de elevado grau não são recomendados** quando se pretende suavidade e realismo.  
+- **Splines cúbicos** são geralmente a melhor escolha para dados naturais ou físicos, onde a suavidade local e o comportamento realista são essenciais.
+
+Ambas as questões realizadas confirmam estas conclusões teóricas com resultados práticos claros e visualmente evidentes.
+
